@@ -1,0 +1,20 @@
+[project]
+name="webtool"
+description="A web tool to assist general maintanence or viewing of a website"
+authors=[{name="Dominic Dangerfield", email="dominic.t.dangerfield@gmail.com"}]
+license="MIT"
+readme="README.md"
+keywords=["python", "web", "tool", "search"]
+requires-python=">=3.9"
+dependencies=[
+    "requests",
+    "openpyxl",
+    "beautifulsoup4",
+    "pyinstaller"
+]
+
+[project.urls]
+Repository=""
+Documentation=""
+Issues=""
+Changelogs=""

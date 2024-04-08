@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Test Website</title>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+        <script>
+            $( function() {
+                $( ".accordion_base" ).accordion({
+                    active: false,
+                    collapsible: true,
+                    heightStyle: "content"
+                });
+            } );
+        </script>
+        <style>
+        /*! Override the jQuery UI accordion styles */
+        </style>
+    </head>
+    <body style="display:block; width:80%; margin-left:auto; margin-right:auto">
+        <h1 align="center"><img src="../../icons/webtool_icon.ico" style="border-radius: 50%;"> Home of the Web Tool Test Site</h1>
+        <h2>Introduction</h2>
+        <p>This is a <i>super</i> simple test for the Web Tool. Will be updated as tests are expanded and there is new functionality added to the webscrapper.</p>
+
+        <img src="files/images/testJpg.jpg" alt="Test JPG" style="width: 19%"/>
+        <img src="files/images/testPng.png" alt="Test png" style="width: 19%"/>
+        <img src="files/images/testJpg.jpg" alt="Test JPG" style="width: 19%"/>
+        <img src="files/images/testPng.png" alt="Test png" style="width: 19%"/>
+        <img src="files/images/testJpg.jpg" alt="Test JPG" style="width: 19%"/>
+
+        <h2>Site Map</h2>
+        <p>This is the full list of information that is on the page. Update this as the website and different cases are created. (and yes, I used jQuery accordion for this, after which I saw that I could've made this a bit easier... don't judge me.</p>
+
+        <div id="main_accordion" class="accordion_base">
+            <h3>test_site/</h3>
+            <div>
+                <ul>
+                    <li>index.html <= <i>Current location</i></li>
+                    <li>hidden.html</li>
+                </ul>
+                <div id="test_site_accordion" class="accordion_base">
+                    <h3>files/</h3>
+                    <div>
+                        <div id="files_accordion" class="accordion_base">
+                            <h3>images/</h3>
+                            <div>
+                                <ul>
+                                    <li><a href="./files/images/testJpg.jpg">testJpg.jpg</a></li>
+                                    <li><a href="./files/images/testPng.png">testPng.png</a></li>
+                                </ul>
+                            </div>
+                            <h3>pdfs/</h3>
+                            <div>
+                                <ul>
+                                    <li><a href="./files/pdfs/testPdf.pdf">testPdf.pdf</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <h3>games/</h3>
+                    <div>
+                        <ul><li><a href="./games/games.html">games.html</a></li></ul>
+                        <div id="games_accordion" class="accordion_base">
+                            <h3>nintendo/</h3>
+                            <div></div>
+                            <h3>pc/</h3>
+                            <div></div>
+                            <h3>playstation/</h3>
+                            <div></div>
+                            <h3>xbox/</h3>
+                            <div></div>
+                        </div>
+                    </div>
+                    <h3>movies/</h3>
+                    <div>
+                        <ul><li><a href="./movies/movies.html">movies.html</a></li></ul>
+                        <div id="movies_accordion" class="accordion_base">
+                            <h3>action/</h3>
+                            <div></div>
+                            <h3>comedy/</h3>
+                            <div></div>
+                            <h3>drama/</h3>
+                            <div></div>
+                            <h3>scifi/</h3>
+                            <div></div>
+                        </div>
+                    </div>
+                    <h3>music/</h3>
+                    <div>
+                        <ul><li><a href="./music/music.html">music.html</a></li></ul>
+                        <div id="music_accordion" class="accordion_base">
+                            <h3>hiphop/</h3>
+                            <div></div>
+                            <h3>rap/</h3>
+                            <div></div>
+                            <h3>rnb/</h3>
+                            <div></div>
+                            <h3>soul/</h3>
+                            <div></div>
+                        </div>
+                    </div>
+                    <h3>outside/</h3>
+                    <div>
+                        <ul><li><a href="./outside/outside.html">outside.html</a></li></ul>
+                        <div id="outside_accordion" class="accordion_base">
+                            <h3>biking/</h3>
+                            <div></div>
+                            <h3>fishing/</h3>
+                            <div></div>
+                            <h3>hiking/</h3>
+                            <div></div>
+                            <h3>skating/</h3>
+                            <div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p><strong>Note:</strong> If not gibberish, all information on these webpages has been copied from wikipedia or came from out of my mind, both of which can be a mess at times.</p>
+    </body>
+</html>
