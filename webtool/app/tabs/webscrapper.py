@@ -36,9 +36,8 @@ class Webscrapper(tk.Frame):
         "- This webscrapper can traverse through any list of urls and search for any text.\n"
         "- The file has to be in an excel format and listed in the first column.\n"
         "- The default file to be searched is 'search.xlsx' in the program's directory if no file is selected.\n"
-        "- To search for multiple things, use '+' with no spaces between the '+' and the search text."
-        "- Hover over items with '\u2071' alongside it.\n"
-        "- For assistance, email Dominic Dangerfield at dominic.t.dangerfield@gmail.com.\n")
+        "- To search for multiple things, use '+' with no spaces between the '+' and the search text.\n"
+        "- Hover over items with '\u2071' alongside it.")
 
     def __init__(self, parent, root):
         self.logger = get_logger()
