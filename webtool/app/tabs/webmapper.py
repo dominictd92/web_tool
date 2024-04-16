@@ -3,7 +3,6 @@
 #   links found on each page starting with the home page
 #
 
-import logging
 import re
 import requests
 import threading
@@ -14,12 +13,13 @@ from tkinter import ttk
 
 from bs4 import BeautifulSoup
 
-from webtool.config.configs import LOG_ENV
+from webtool.widget.CollapsibleFrame import CollapsibleFrame
 from webtool.widget.ScrollableFrame import ScrollableFrame
+from webtool.widget.ScrollableText import ScrollableText
 from webtool.constants.constants import *
 from webtool.utils.fileutils import export_xlsx
+from webtool.utils.loggingutils import get_logger
 from webtool.utils.webutils import return_webpage, update_url
-from webtool.utils.widgetutils import activate
 
 
 # the class for the webmapper with all needed methods within it
@@ -33,16 +33,16 @@ class Webmapper(tk.Frame):
     full_url_regex = "{absolute}|{subdirectory}|{relative}"
 
     notes = (
-        " - This webmapper goes through an entire website, following the links on the pages.\n"
-        " - Exporting the result defaults to 'webmapper.xlsx' if there is no filename entered.\n")
+        " - This webmapper goes through an entire website, following the links on the pages.\n")
 
-    def __init__(self, parent, root):
-        self.logger = logging.getLogger(LOG_ENV)
-        super().__init__(parent)
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+
+        self.logger = get_logger()
 
         self.scrollable_frame = ScrollableFrame(self)
 
-        # variables
+        # Variables used throughout the webmapper
         self.urls_searched = []
         self.urls_to_search = []
         self.url_protocol_option = tk.StringVar()
@@ -58,57 +58,45 @@ class Webmapper(tk.Frame):
 
         # Webmapper frames
         #   Note frame
-        note_frame = tk.Frame(self.scrollable_frame)
-        note_frame.grid(row=0, sticky=tk.EW)
+        note_frame = tk.Frame(self.scrollable_frame, highlightbackground='white', highlightthickness=1)
+        note_frame.grid(row=0, column=0, sticky=tk.EW)
 
         #   Input frame
         input_frame = tk.Frame(self.scrollable_frame)
-        input_frame.grid(row=1, sticky=tk.EW)
+        input_frame.grid(row=1, column=0, sticky=tk.EW)
 
         #   Button frame
         button_frame = tk.Frame(self.scrollable_frame)
-        button_frame.grid(row=2, sticky=tk.EW)
+        button_frame.grid(row=2, column=0, sticky=tk.EW)
 
         #   Results frame
         self.results_label_text = tk.StringVar()
         self.results_label_text.set("Results")
-        self.results_labelframe = ttk.LabelFrame(self.scrollable_frame, text=self.results_label_text.get(), height=200)
-        self.results_labelframe.grid(row=3, sticky=tk.EW)
+        self.results_labelframe = tk.LabelFrame(
+            self.scrollable_frame, text=self.results_label_text.get(), height=200, width=725)
+        self.results_labelframe.grid(row=3, column=0, sticky=tk.EW)
         self.results_labelframe.grid_rowconfigure(0, weight=1)
         self.results_labelframe.grid_columnconfigure(0, weight=1)
         self.results_labelframe.grid_propagate(False)
 
         #   Skipped urls frame
-        skipped_labelframe = tk.LabelFrame(self.scrollable_frame, text="Skipped URLs", height=200)
-        skipped_labelframe.grid(row=4, sticky=tk.EW, pady=5)
+        skipped_labelframe = tk.LabelFrame(
+            self.scrollable_frame, text="Skipped URLs", height=200, width=725)
+        skipped_labelframe.grid(row=4, column=0, sticky=tk.EW, pady=5)
         skipped_labelframe.grid_rowconfigure(0, weight=1)
         skipped_labelframe.grid_columnconfigure(0, weight=1)
         skipped_labelframe.grid_propagate(False)
 
         # Widgets within the frames
         #   Note frame
-        self.notes_label_text = tk.StringVar()
-        self.notes_label_text.set(collapsible_texts[0].format(object="Notes"))
-        note_label_label = tk.Label(note_frame, textvariable=self.notes_label_text,
-                                    anchor=tk.W, justify=tk.LEFT, cursor='hand2')
+        note_label_label = tk.Label(note_frame, text="", anchor=tk.W, justify=tk.LEFT, cursor='hand2')
         note_label_label.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
 
-        separator = ttk.Separator(note_frame, orient=tk.HORIZONTAL)
-        separator.grid(row=0, column=1, columnspan=4, sticky=tk.W)
+        note_collapsible_frame = CollapsibleFrame(note_frame, "Note", note_label_label)
+        note_collapsible_frame.grid(row=1, column=0, padx=5, pady=5, sticky=tk.EW)
 
-        self.note_collapsible_frame = tk.Frame(note_frame)
-        self.note_collapsible_frame.grid(row=1, sticky=tk.EW)
-
-        note_label = tk.Label(self.note_collapsible_frame, textvariable=note_text,
-                              wraplength=680, justify=tk.LEFT)
+        note_label = tk.Label(note_collapsible_frame, textvariable=note_text, wraplength=680, justify=tk.LEFT)
         note_label.grid(row=0, column=0, columnspan=5, padx=5, pady=5)
-
-        # ensures that the label is clickable
-        note_label_label.bind(
-            '<Button-1>',
-            lambda e: activate(self.note_collapsible_frame, self.notes_label_text, "Notes"))
-
-        activate(self.note_collapsible_frame, self.notes_label_text, "Notes")
 
         #   Input frame
         starting_url_label = tk.Label(input_frame, text="Starting URL: ")
@@ -117,55 +105,44 @@ class Webmapper(tk.Frame):
         starting_url_protocol = tk.OptionMenu(input_frame, self.url_protocol_option, *url_protocol_options)
         starting_url_protocol.grid(row=0, column=1, sticky=tk.E, padx=5, pady=10)
 
-        starting_url_entry = ttk.Entry(input_frame, textvariable=self.starting_url, width=50, justify=tk.LEFT)
+        starting_url_entry = ttk.Entry(input_frame, textvariable=self.starting_url, width=45, justify=tk.LEFT)
         starting_url_entry.grid(row=0, column=2, columnspan=3, sticky=tk.W, padx=10, pady=10)
 
         ignore_files_label = tk.Label(input_frame, text="Ignore file extensions: ")
         ignore_files_label.grid(row=1, column=0, sticky=tk.W, padx=10, pady=10)
 
-        ignore_files_entry = ttk.Entry(input_frame, textvariable=self.ignore_files, width=50, justify=tk.LEFT)
+        ignore_files_entry = ttk.Entry(input_frame, textvariable=self.ignore_files, width=45, justify=tk.LEFT)
         ignore_files_entry.grid(row=1, column=2, columnspan=4, sticky=tk.W, padx=10, pady=10)
 
-        file_name_label = ttk.Label(input_frame, text="File Name: ")
+        file_name_label = tk.Label(input_frame, text="File Name: ")
         file_name_label.grid(row=2, column=0, sticky=tk.W, padx=10, pady=10)
 
-        file_name_entry = ttk.Entry(input_frame, textvariable=self.file_name, width=50, justify=tk.LEFT)
-        file_name_entry.grid(row=2, column=1, columnspan=4, sticky=tk.W, padx=10, pady=10)
+        file_name_entry = ttk.Entry(input_frame, textvariable=self.file_name, width=45, justify=tk.LEFT)
+        file_name_entry.grid(row=2, column=2, columnspan=4, sticky=tk.W, padx=10, pady=10)
 
         #   Button frame
-        self.search_button = ttk.Button(
-            button_frame, text="Search", state=tk.NORMAL, width=10,
+        self.search_button = tk.Button(
+            button_frame, text="Search", state=tk.NORMAL, width=10, fg="black", disabledforeground="black",
             command=lambda: False if not self.validate_values() else threading.Thread(target=self.map).start())
         self.search_button.grid(row=0, column=0, padx=10, pady=10)
 
-        self.stop_button = ttk.Button(
-            button_frame, text="Stop", state=tk.DISABLED, width=10,
+        self.stop_button = tk.Button(
+            button_frame, text="Stop", state=tk.DISABLED, width=10, fg="black", disabledforeground="black",
             command=lambda: self.stop_variable.set(True))
-        self.stop_button.grid(row=0, column=1, padx=10, pady=10)
+        self.stop_button.grid(row=0, column=2, padx=10, pady=10)
 
-        export_button = ttk.Button(
-            button_frame, text="Export", width=10,
-            command=lambda: export_xlsx(filename='webmapper_results', dataset=self.urls_searched))
-        export_button.grid(row=0, column=2, padx=10, pady=10)
-
-        quit_button = ttk.Button(button_frame, text="Quit", command=root.quit, width=10)
-        quit_button.grid(row=0, column=3, padx=10, pady=10)
+        export_button = tk.Button(
+            button_frame, text="Export", width=10, fg="black", disabledforeground="black",
+            command=lambda: export_xlsx(dataset=self.urls_searched, default_filename=mapper_default_filename))
+        export_button.grid(row=0, column=4, padx=10, pady=10)
 
         #   Results frame
-        self.results_text = tk.Text(self.results_labelframe)
-        self.results_text.grid(row=0, column=0, columnspan=4, sticky=tk.NSEW, padx=10, pady=10)
-
-        results_scrollbar = ttk.Scrollbar(self.results_labelframe, command=self.results_text.yview)
-        results_scrollbar.grid(row=0, column=4, sticky=tk.NSEW)
-        self.results_text['yscrollcommand'] = results_scrollbar.set
+        self.results_text = ScrollableText(self.results_labelframe, highlightthickness=0, wrap='none')
+        self.results_text.grid(row=0, column=0, columnspan=4, sticky=tk.NSEW, pady=(5, 5), padx=(5, 15))
 
         #   Skipped frame
-        self.skipped_text = tk.Text(skipped_labelframe)
-        self.skipped_text.grid(row=0, column=0, columnspan=4, sticky=tk.NSEW, padx=10, pady=10)
-
-        skipped_scrollbar = ttk.Scrollbar(skipped_labelframe, command=self.skipped_text.yview)
-        skipped_scrollbar.grid(row=0, column=4, sticky=tk.NSEW)
-        self.skipped_text['yscrollcommand'] = skipped_scrollbar.set
+        self.skipped_text = ScrollableText(skipped_labelframe, highlightthickness=0, wrap='none')
+        self.skipped_text.grid(row=0, column=0, columnspan=4, sticky=tk.NSEW, pady=(5, 5), padx=(5, 15))
 
     # Change the state of the search button, export results button, and stop button
     def flip_buttons(self):

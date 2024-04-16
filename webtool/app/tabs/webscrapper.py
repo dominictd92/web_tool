@@ -11,44 +11,46 @@ import requests
 import openpyxl
 
 import tkinter as tk
-import tkinter.filedialog as filedialog
 import tkinter.messagebox as messagebox
 from tkinter import ttk
 
+from webtool.widget.CollapsibleFrame import CollapsibleFrame
 from webtool.widget.Hint import Hint
 from webtool.widget.ScrollableFrame import ScrollableFrame
+from webtool.widget.ScrollableText import ScrollableText
 from webtool.constants.constants import *
-from webtool.utils.fileutils import export_txt, export_xlsx
+from webtool.utils.fileutils import select_open_name, export_txt, export_xlsx
 from webtool.utils.loggingutils import get_logger
 from webtool.utils.validationutils import validate_int
 from webtool.utils.webutils import return_webpage
-from webtool.utils.widgetutils import activate
 
 
 # the class for the webscrapper with all needed methods within it
 class Webscrapper(tk.Frame):
     # class variables
-    default_filename = "search.xlsx"
     found_text_formatter = " - Found Text: '{search_string}' on {url} {find_count} time(s)\n"
     history_text_formatter = "Searches: {searches}\n{results}" + ("-" * 15) + "\n"
 
     notes = (
         "- This webscrapper can traverse through any list of urls and search for any text.\n"
         "- The file has to be in an excel format and listed in the first column.\n"
-        "- The default file to be searched is 'search.xlsx' in the program's directory if no file is selected.\n"
+        "- The default file to be searched is 'search_file.xlsx' in the program's directory.\n"
         "- To search for multiple things, use '+' with no spaces between the '+' and the search text.\n"
         "- Hover over items with '\u2071' alongside it.")
 
-    def __init__(self, parent, root):
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+        super().columnconfigure(0, weight=1)
+        super().rowconfigure(0, weight=1)
+
         self.logger = get_logger()
-        super().__init__(parent)
 
         self.scrollable_frame = ScrollableFrame(self)
 
         # Variables used throughout the webscrapper
         self.found_results = []
         self.filename = tk.StringVar()
-        self.filename.set(self.default_filename)
+        self.filename.set(default_search_file)
         self.input_variable = tk.StringVar()
         self.completion_text = tk.StringVar()
         self.completion_text.set("Results: ")
@@ -58,7 +60,7 @@ class Webscrapper(tk.Frame):
         self.stop_variable.set(False)
         # variables for options
         self.specific_tags = tk.StringVar()
-        self.specific_tags.set("Look for specific tags (In development...)")
+        self.specific_tags.set("Look for specific tags (in development...)")
         self.case_sensitive = tk.IntVar()
         self.auto_retry_urls = tk.IntVar()
         self.force_retry_urls = tk.IntVar()
@@ -66,62 +68,57 @@ class Webscrapper(tk.Frame):
 
         # Webscrapper frames
         #   Note frame
-        note_frame = tk.Frame(self.scrollable_frame, highlightbackground='white', highlightthickness=2)
-        note_frame.grid(row=0, sticky=tk.EW)
+        note_frame = tk.Frame(self.scrollable_frame, highlightbackground='white', highlightthickness=1)
+        note_frame.grid(row=0, column=0, sticky=tk.EW)
 
         #   Search frame
-        search_frame = tk.Frame(self.scrollable_frame, highlightbackground='white', highlightthickness=2)
-        search_frame.grid(row=1, sticky=tk.EW)
+        search_frame = tk.Frame(self.scrollable_frame, highlightbackground='white', highlightthickness=1)
+        search_frame.grid(row=1, column=0, sticky=tk.EW)
 
         #   Options frame
-        options_frame = tk.Frame(self.scrollable_frame, highlightbackground='white', highlightthickness=2)
-        options_frame.grid(row=2, sticky=tk.EW)
+        options_frame = tk.Frame(self.scrollable_frame, highlightbackground='white', highlightthickness=1)
+        options_frame.grid(row=2, column=0, sticky=tk.EW)
 
         #   Buttons frame
         button_frame = tk.Frame(self.scrollable_frame)
-        button_frame.grid(row=3, sticky=tk.EW)
+        button_frame.grid(row=3, column=0, sticky=tk.EW)
+        button_frame.columnconfigure(2, weight=1)
 
         #   Results frame
-        self.results_labelframe = tk.LabelFrame(self.scrollable_frame, text=self.completion_text.get(), height=200)
-        self.results_labelframe.grid(row=4, sticky=tk.EW)
+        self.results_labelframe = tk.LabelFrame(
+            self.scrollable_frame, text=self.completion_text.get(), height=200, width=725)
+        self.results_labelframe.grid(row=4, column=0, sticky=tk.EW)
         self.results_labelframe.grid_rowconfigure(0, weight=1)
         self.results_labelframe.grid_columnconfigure(0, weight=1)
         self.results_labelframe.grid_propagate(False)
 
         #   Skipped urls frame
-        skipped_labelframe = tk.LabelFrame(self.scrollable_frame, text="Skipped URLs:", height=200)
-        skipped_labelframe.grid(row=5, sticky=tk.EW)
+        skipped_labelframe = tk.LabelFrame(
+            self.scrollable_frame, text="Skipped URLs:", height=200, width=725)
+        skipped_labelframe.grid(row=5, column=0, sticky=tk.EW)
         skipped_labelframe.grid_rowconfigure(0, weight=1)
         skipped_labelframe.grid_columnconfigure(0, weight=1)
         skipped_labelframe.grid_propagate(False)
 
         #   History frame
-        history_labelframe = tk.LabelFrame(self.scrollable_frame, text="History:", height=200)
-        history_labelframe.grid(row=6, sticky=tk.EW)
+        history_labelframe = tk.LabelFrame(
+            self.scrollable_frame, text="History:", height=200, width=725)
+        history_labelframe.grid(row=6, column=0, sticky=tk.EW)
         history_labelframe.grid_rowconfigure(0, weight=1)
         history_labelframe.grid_columnconfigure(0, weight=1)
         history_labelframe.grid_propagate(False)
 
         # Widgets within the frames
         #   Note frame
-        self.notes_label_text = tk.StringVar()
-        self.notes_label_text.set(collapsible_texts[0].format(object="Notes"))
         note_label_label = tk.Label(
-            note_frame, textvariable=self.notes_label_text, anchor=tk.W, justify=tk.LEFT, cursor='hand2')
+            note_frame, text="", justify=tk.LEFT, cursor='hand2')
         note_label_label.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
 
-        note_collapsible_frame = tk.Frame(note_frame)
-        note_collapsible_frame.grid(row=1, sticky=tk.EW)
+        note_collapsible_frame = CollapsibleFrame(note_frame, "Note", note_label_label)
+        note_collapsible_frame.grid(row=1, column=0, padx=5, pady=5, sticky=tk.EW)
 
         note_label = tk.Label(note_collapsible_frame, textvariable=note_text, wraplength=680, justify=tk.LEFT)
         note_label.grid(row=0, column=0, columnspan=5, padx=10, pady=(0, 10))
-
-        note_label_label.bind(
-            '<Button-1>',
-            lambda e: activate(note_collapsible_frame, self.notes_label_text, "Notes"))
-
-        # start with the notes collapsed
-        activate(note_collapsible_frame, self.notes_label_text, "Notes")
 
         #   Search frame
         search_label = tk.Label(search_frame, text="Search Settings")
@@ -133,11 +130,13 @@ class Webscrapper(tk.Frame):
         file_label = tk.Label(search_frame, textvariable=self.filename, justify=tk.LEFT, anchor=tk.W)
         file_label.grid(row=1, column=1, columnspan=4, padx=5, pady=5, sticky=tk.W)
 
-        file_button = tk.Button(search_frame, text="Browse Files", width=10, command=self.select_file)
+        file_button = tk.Button(
+            search_frame, text="Browse Files", width=10,
+            command=lambda: self.filename.set(select_open_name(default_search_file, excel_ext)))
         file_button.grid(row=2, column=0, padx=(15, 5), pady=5, sticky=tk.W)
 
         clear_file_button = tk.Button(search_frame, text="Clear File", width=10,
-                                      command=lambda: self.filename.set(self.default_filename))
+                                      command=lambda: self.filename.set(default_search_file))
         clear_file_button.grid(row=2, column=1, padx=5, pady=5, sticky=tk.W)
 
         search_label = tk.Label(search_frame, text="Search terms: ")
@@ -147,13 +146,10 @@ class Webscrapper(tk.Frame):
         search_entry.grid(row=3, column=1, columnspan=4, sticky=tk.W, padx=5, pady=5)
 
         #   Options frame
-        options_label_text = tk.StringVar()
-        options_label_text.set(collapsible_texts[0].format(object="Options"))
-        options_label_label = tk.Label(
-            options_frame, textvariable=options_label_text, anchor=tk.W, justify=tk.LEFT, cursor='hand2')
+        options_label_label = tk.Label(options_frame, text="", anchor=tk.W, justify=tk.LEFT, cursor='hand2')
         options_label_label.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
 
-        options_collapsible_frame = tk.Frame(options_frame)
+        options_collapsible_frame = CollapsibleFrame(options_frame, "Options", options_label_label)
         options_collapsible_frame.grid(row=1, sticky=tk.EW)
 
         specific_tags_label = tk.Label(options_collapsible_frame, text="HTML tags \u2071")
@@ -215,13 +211,6 @@ class Webscrapper(tk.Frame):
         self.option_retry_quantity_entry.grid(row=2, column=4, columnspan=4, sticky=tk.W, padx=5, pady=5)
         self.option_retry_quantity_entry.insert(0, "3")
 
-        options_label_label.bind(
-            "<Button-1>",
-            lambda e: activate(options_collapsible_frame, options_label_text, "Options"))
-
-        # start with the options collapsed
-        activate(options_collapsible_frame, options_label_text, "Options")
-
         #   Buttons frame
         self.search_button = tk.Button(
             button_frame, text="Search", state=tk.NORMAL, width=10, fg="black", disabledforeground="black",
@@ -235,53 +224,31 @@ class Webscrapper(tk.Frame):
 
         self.export_results_button = tk.Button(
             button_frame, text="Export Results", state=tk.NORMAL, width=10, fg="black", disabledforeground="black",
-            command=lambda: threading.Thread(target=export_xlsx(filename='', dataset=self.found_results)).start())
-        self.export_results_button.grid(row=0, column=2, padx=10, pady=5)
+            command=lambda: threading.Thread(
+                target=export_xlsx(
+                    dataset=self.found_results,
+                    default_filename=default_results_filename)).start())
+        self.export_results_button.grid(row=0, column=3, padx=10, pady=5)
 
         export_history_button = tk.Button(
             button_frame, text="Export History", width=10, fg="black", disabledforeground="black",
             command=lambda: threading.Thread(
-                    target=export_txt(filename='', dataset=self.history_text.get("1.0", tk.END))).start())
-        export_history_button.grid(row=0, column=3, padx=10, pady=5)
-
-        quit_button = tk.Button(
-            button_frame, text="Quit", width=10, fg="black", disabledforeground="black", command=root.quit)
-        quit_button.grid(row=0, column=4, padx=10, pady=5)
+                    target=export_txt(
+                        dataset=self.history_text.get("1.0", tk.END),
+                        default_filename=default_history_filename)).start())
+        export_history_button.grid(row=0, column=4, padx=10, pady=5)
 
         #   Results frame
-        self.results_text = tk.Text(self.results_labelframe)
-        self.results_text.grid(row=0, column=0, columnspan=4, sticky=tk.NSEW, padx=10, pady=10)
-
-        results_scrollbar = ttk.Scrollbar(
-            self.results_labelframe, command=self.results_text.yview)
-        results_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
-        self.results_text['yscrollcommand'] = results_scrollbar.set
+        self.results_text = ScrollableText(self.results_labelframe, highlightthickness=0, wrap='none')
+        self.results_text.grid(row=0, column=0, columnspan=4, sticky=tk.NSEW, pady=(5, 5), padx=(5, 15))
 
         #   Skipped frame
-        self.skipped_text = tk.Text(skipped_labelframe)
-        self.skipped_text.grid(row=0, column=0, columnspan=4, sticky=tk.NSEW, padx=10, pady=10)
-
-        skipped_scrollbar = ttk.Scrollbar(skipped_labelframe, command=self.skipped_text.yview)
-        skipped_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
-        self.skipped_text['yscrollcommand'] = skipped_scrollbar.set
+        self.skipped_text = ScrollableText(skipped_labelframe, highlightthickness=0, wrap='none')
+        self.skipped_text.grid(row=0, column=0, columnspan=4, sticky=tk.NSEW, pady=(5, 5), padx=(5, 15))
 
         #   History frame
-        self.history_text = tk.Text(history_labelframe)
-        self.history_text.grid(row=0, column=0, columnspan=4, sticky=tk.NSEW, padx=10, pady=10)
-
-        history_scrollbar = ttk.Scrollbar(history_labelframe, command=self.history_text.yview)
-        history_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
-        self.history_text['yscrollcommand'] = history_scrollbar.set
-
-    # Function for selecting a file from the system
-    def select_file(self):
-        selected_file = filedialog.askopenfilename(
-            initialdir=os.getcwd(), title="Select a File",
-            filetypes=(("Excel Files", "*.xlsx .xls"), ("all files", "*.* ")))
-        if selected_file is None or selected_file == '':
-            self.filename.set(self.default_filename)
-        else:
-            self.filename.set(selected_file)
+        self.history_text = ScrollableText(history_labelframe, highlightthickness=0, wrap='none')
+        self.history_text.grid(row=0, column=0, columnspan=4, sticky=tk.NSEW, pady=(5, 5), padx=(5, 15))
 
     # Change the state of the search button, export results button, and stop button
     def flip_buttons(self):

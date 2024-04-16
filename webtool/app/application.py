@@ -15,24 +15,26 @@ from webtool.utils.loggingutils import get_logger
 # this class combines the tabs for all tools
 class Application(tk.Tk):
     def __init__(self, *args, **kwargs):
-        self.logger = get_logger()
         super().__init__(*args, **kwargs)
-        super().title("Web Tool")
-        super().wm_title("Web Tool")
-        super().geometry("800x850")
+
+        self.logger = get_logger()
+
+        self.title("Web Tool")
+        self.wm_title("Web Tool")
+        self.geometry("800x850")
 
         # create the tabs
         tab_controller = ttk.Notebook(self)
-        webscrapper_tab = webscrapper.Webscrapper(tab_controller, self)
-        webmapper_tab = webmapper.Webmapper(tab_controller, self)
+        webscrapper_tab = webscrapper.Webscrapper(tab_controller)
+        webmapper_tab = webmapper.Webmapper(tab_controller)
         admin_tab = admin.Admin(tab_controller)
 
-        # build out a list of tabs alongside their sizes and names that will be built later
+        # a list of tabs alongside their sizes and names to auto resize the window
         #   tab: tkinter frame, name: displayed name of the tab, size: 'width x height' of the window
         self.tabs_list = [
             {'tab': webscrapper_tab, 'name': "Webscrapper", 'size': "800x850"},
-            {'tab': webmapper_tab, 'name': "Webmapper", 'size': "800x850"},
-            {'tab': admin_tab, 'name': "Admin", 'size': "800x850"}
+            {'tab': webmapper_tab, 'name': "Webmapper", 'size': "800x700"},
+            {'tab': admin_tab, 'name': "Admin", 'size': "800x350"}
         ]
 
         # add the tabs to the window

@@ -5,11 +5,11 @@
 import sys
 import os.path
 import pathlib
-import platform
 
 import logging.config
 
 from webtool.config.configs import *
+from webtool.utils.fileutils import open_dir
 
 
 # get the logger
@@ -61,18 +61,10 @@ def get_logging_location():
         return os.path.join(base_path, LOG_FILE_LOCATION, LOG_FILE)
 
 
-# Open the folder of the log file; only accounting Windows, macOS, and Linx, mobile OS and such are not.
+# Open the folder of the log file; only accounting Windows and macOS for now.
 def open_log_folder():
-    user_platform = platform.platform()
-    match user_platform.split():
-        case (*_, "macOS"):
-            return "macOS"
-        case (*_, "Windows"):
-            return "Windows"
-        case (*_, "Linux"):
-            return "Linux"
-        case _:
-            return "Unrecognized"
+    directory = pathlib.Path(str(get_logging_location())).parent
+    open_dir(directory)
 
 
 # Clear the log file's data

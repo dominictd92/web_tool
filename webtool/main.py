@@ -13,5 +13,5 @@ logger.debug("Logger is established")
 
 if __name__ == '__main__':
     tkinter_window = Application()
-    logger.debug("Application is running")
+    logger.info("Application is running")
     tkinter_window.mainloop()
