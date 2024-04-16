@@ -18,13 +18,13 @@ ReadMe.md file. Although these commands work for both macOS and Windows, you can
 that you are not currently on. Refer to [Pyinstaller](https://pyinstaller.org/en/stable/) for more information and other options.
 
 ```bash
-pyinstaller --windowed --onedir --clean --noconfirm --name WebTool webtool/main.py 
+pyinstaller --windowed --onedir --clean --icon icons/webtool_icon.icns --noconfirm --name WebTool webtool/main.py
 ```
 
 To open a terminal when opening the app, use the following:
 
 ```bash
-pyinstaller --nowindowed --onedir --clean --noconfirm --name WebTool webtool/main.py
+pyinstaller --nowindowed --onedir --clean --icon icons/webtool_icon.icns --noconfirm --name WebTool webtool/main.py
 ```
 
 On windows, the above command will create an executable file that will open command prompt simultaneously. For macOS,
@@ -33,6 +33,8 @@ both commands will generate a UNIX executable file that can be run from Terminal
 ```bash
 open -n WebTool
 ```
+
+The icon is added when using "--icon", but you may have to use the .ico version depending on the system you're working on. 
 
 Pyinstaller mentions that using '--onefile' and '--windowed' is not recommended. According to Pyinstaller "because they 
 require unpacking on each run (and the unpacked content might be scanned by the OS each time). Furthermore, onefile 
