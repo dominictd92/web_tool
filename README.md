@@ -34,7 +34,7 @@ both commands will generate a UNIX executable file that can be run from Terminal
 open -n WebTool
 ```
 
-The icon is added when using "--icon", but you may have to use the .ico version depending on the system you're working on. 
+The icon is added when using "--icon", but you may have to use the .ico version of the file if you're working on Windows. 
 
 Pyinstaller mentions that using '--onefile' and '--windowed' is not recommended. According to Pyinstaller "because they 
 require unpacking on each run (and the unpacked content might be scanned by the OS each time). Furthermore, onefile 
@@ -51,6 +51,8 @@ with the subject "Web Tool Support".
 
 There are a number of changes that need to happen for this project, from testing to functionality to looks, and making
 it production level will take time. For what's to come, review the [Roadmap](https://github.com/dominictd92/web_tool/wiki/Roadmap). 
+A brief (unmaintained) list of changes expected to come are below:
+
 
 ### Web Tool 
 
@@ -78,6 +80,12 @@ The Webscrapper will have the following options:
 - Restrictions on terms within URLs to search.
 - Sorting the results. 
 - Searching the results. 
+
+# Changelog
+
+To keep up with all changes that have been pushed to the main branch, view the [Changelog](https://github.com/dominictd92/web_tool/wiki/Changelog).
+The changelog will detail all major changes from each commit to the main branch. Simple changes like updates to the README.md will not be 
+included in the changelog. 
 
 # Authors
 
