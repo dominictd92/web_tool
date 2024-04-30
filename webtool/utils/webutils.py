@@ -3,12 +3,12 @@
 #   All requests should come from here
 #
 
-import re
+from re import search
 
 import requests
 from urllib.parse import urlparse, urljoin
 
-from webtool.constants.constants import *
+from webtool.constants.constants import has_any_file_ext_regex
 from webtool.utils.loggingutils import get_logger
 
 
@@ -24,7 +24,7 @@ def return_webpage(session, url, retry_quantity, timeout_limit):
             if i < retry_quantity - 1:
                 continue
             else:
-                logger.debug("URL {url} timed out".format(url=url))
+                logger.debug(f"URL {url} timed out")
                 raise timeoutError
 
 
@@ -42,9 +42,9 @@ def update_url(url, base_url=None, add_end_slash=False):
     if add_end_slash:
         parsed_url = urlparse(standard_url)
         # if this isn't a file, add a slash at the end of the
-        if not re.search(has_any_file_ext_regex, parsed_url.path) or parsed_url.path == '':
+        if not search(has_any_file_ext_regex, parsed_url.path) or parsed_url.path == '':
             standard_url = urljoin(parsed_url.geturl(), "./")
 
-    logger.debug("Standardized {old} to {new}".format(old=url, new=standard_url))
+    logger.debug(f"Standardized {url} to {standard_url}")
 
     return standard_url

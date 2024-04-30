@@ -2,12 +2,12 @@
 # Utility methods for getting system information
 #
 
-import platform
+from platform import platform
 
 
 # get the OS that this is being run on
 def get_os():
-    current_platform = platform.platform()
+    current_platform = platform()
 
     if "macOS" in current_platform:
         return "macOS"

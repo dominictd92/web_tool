@@ -2,12 +2,12 @@
 # This creates a collapsible frame, with a button/link to show/hide an associated frame
 #
 
-import tkinter as tk
+from tkinter import Frame
 
 from webtool.constants.constants import collapsible_texts
 
 
-class CollapsibleFrame(tk.Frame):
+class CollapsibleFrame(Frame):
     def __init__(self, parent, label_name, activator, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.label_name = label_name

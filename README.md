@@ -58,7 +58,7 @@ A brief (unmaintained) list of changes expected to come are below:
 
 Here is a list of a few things that are still to come for the entire project:
 
-- Create an icon.
+- Create a new icon.
 - Set up logging for the application.
 - Fill test website. 
 - Set up Python tests for all functions. 
@@ -84,7 +84,7 @@ The Webscrapper will have the following options:
 # Changelog
 
 To keep up with all changes that have been pushed to the main branch, view the [Changelog](https://github.com/dominictd92/web_tool/wiki/Changelog).
-The changelog will detail all major changes from each commit to the main branch. Simple changes like updates to the README.md will not be 
+The changelog will detail all **major** changes from each commit to the main branch. Simple changes like updates to the README.md will not be 
 included in the changelog. 
 
 # Authors

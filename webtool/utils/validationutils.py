@@ -3,7 +3,7 @@
 #   here unless it is a simple empty check
 #
 
-import re
+from re import match
 
 
 # method to validate tkinter entry for an integer
@@ -11,7 +11,7 @@ def validate_int(result_value, callback_reason=None, min_value=None, max_value=N
     number_regex = "^[-]?[0-9]+$"
 
     if callback_reason is None:
-        if re.match(number_regex, result_value):
+        if match(number_regex, result_value):
             if max_value is not None and int(result_value) > int(max_value):
                 return False
             if min_value is not None and int(result_value) < int(min_value):
@@ -31,7 +31,7 @@ def validate_int(result_value, callback_reason=None, min_value=None, max_value=N
                 return False
         elif character_limit is not None and len(result_value) > int(character_limit):
             return False
-        elif re.match(number_regex, result_value):
+        elif match(number_regex, result_value):
             if max_value is not None:
                 if int(result_value) > int(max_value):
                     return False
@@ -40,6 +40,7 @@ def validate_int(result_value, callback_reason=None, min_value=None, max_value=N
                     return False
     return True
 
-# method to validate strings for tkinter entry, checking for character limits and characters allowed.
+
+# method to validate tkinter entry for a string
 def validate_string(result_value, callback_reason=None, allowed_chars=None, character_min=None, character_max=None):
     return False
