@@ -21,8 +21,8 @@ class Hint(Frame):
         self.message = message
         self.parent = parent
 
-        parent.bind('<Enter>', lambda: self.__show_hint())
-        parent.bind('<Leave>', lambda: self.__hide_hint())
+        parent.bind('<Enter>', lambda e: self.__show_hint())
+        parent.bind('<Leave>', lambda e: self.__hide_hint())
 
     def __show_hint(self):
         x, y, cx, cy = self.parent.bbox(INSERT)
