@@ -337,8 +337,8 @@ class Webscrapper(Frame):
             try:
                 current_page = return_webpage(session, url, retry_quantity=retries, timeout_limit=wait_time)
                 for search_string in self.input_variable.get().split("+"):
-                    if self.case_sensitive == 1:
-                        find_count = current_page.text.count(search_string.upper())
+                    if self.case_sensitive.get() == 1:
+                        find_count = current_page.text.count(search_string)
                     else:
                         find_count = current_page.text.upper().count(search_string.upper())
 
